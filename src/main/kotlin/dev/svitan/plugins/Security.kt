@@ -43,7 +43,7 @@ fun Application.configureSecurity() {
             }
         }
 
-        form(name = "myauth2") {
+        form(name = "form") {
             userParamName = "user"
             passwordParamName = "password"
             challenge {
@@ -53,13 +53,13 @@ fun Application.configureSecurity() {
     }
 
     routing {
-        authenticate("myauth1") {
+        authenticate("basic") {
             get("/protected/route/basic") {
                 val principal = call.principal<UserIdPrincipal>()!!
                 call.respondText("Hello ${principal.name}")
             }
         }
-        authenticate("myauth2") {
+        authenticate("form") {
             get("/protected/route/form") {
                 val principal = call.principal<UserIdPrincipal>()!!
                 call.respondText("Hello ${principal.name}")

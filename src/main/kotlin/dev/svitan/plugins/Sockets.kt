@@ -14,15 +14,22 @@ fun Application.configureSockets() {
         masking = false
     }
 
+    var clients = arrayOf<WebSocketServerSession>()
+
     routing {
-        webSocket("/ws") { // websocketSession
+        webSocketRaw("/ws") {
+            clients += this
+
             for (frame in incoming) {
+                if (frame is Frame.Close) {
+                    clients.drop(clients.indexOf(this))
+                    break
+                }
+
                 if (frame is Frame.Text) {
                     val text = frame.readText()
                     outgoing.send(Frame.Text("YOU SAID: $text"))
-                    if (text.equals("bye", ignoreCase = true)) {
-                        close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))
-                    }
+                    clients.forEach { if (it != this) it.outgoing.send(Frame.Text("someone said: $text")) }
                 }
             }
         }
